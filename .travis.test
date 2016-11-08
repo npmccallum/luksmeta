@@ -1,0 +1,40 @@
+#!/bin/bash -ex
+
+case "$1" in
+  debian:*|ubuntu:*)
+    NINJA=ninja
+
+    # This solves an intermittant error when fetching packages on debian
+    sed -i 's|httpredir.debian.org|ftp.us.debian.org|g' /etc/apt/sources.list
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get clean
+    apt-get update
+    #apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade
+    apt-get -y install build-essential meson pkg-config cryptsetup libcryptsetup-dev curl git $CC
+    ;;
+
+  fedora:*|centos:*)
+    NINJA=ninja-build
+    [ "$1" != "fedora:23" ] && rt=compiler-rt
+    yum -y clean all
+    #yum -y --setopt=deltarpm=0 update
+    yum -y --setopt=deltarpm=0 install meson $NINJA pkgconfig cryptsetup cryptsetup-devel curl git gcc $CC $rt
+    ;;
+esac
+
+mkdir build
+
+CFLAGS=-coverage LDFLAGS=-lgcov meson . build
+
+$NINJA -C build
+
+if ! $NINJA -C build test; then
+    cat build/meson-logs/testlog.txt
+    exit 1
+fi
+
+$NINJA -C build install
+
+bash <(curl -s https://codecov.io/bash)

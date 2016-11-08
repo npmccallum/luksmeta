@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "test.h"
+#include "check.h"
 
 char filename[] = "/tmp/luksmetaXXXXXX";
 

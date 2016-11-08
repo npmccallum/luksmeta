@@ -1,0 +1,10 @@
+LUKSMETA_0.0.0 {
+    global:
+        luksmeta_init;
+        luksmeta_load;
+        luksmeta_save;
+        luksmeta_test;
+        luksmeta_wipe;
+    local:
+        *;
+};
